@@ -1,7 +1,7 @@
 /**
  * Physics Experiment
- * Author: Your Name and Carolyn Yao
- * Does this compile or finish running within 5 seconds? Y/N
+ * Author: Jen Chung Liew :D and Carolyn Yao
+ * Does this compile or finish running within 5 seconds? Y
  */
 
 /**
@@ -38,7 +38,47 @@ public class PhysicsExperiment {
     int[][] scheduleTable = new int[numStudents + 1][numSteps + 1];
 
     // Your code goes here
+    int student = 1;      // index of the student in signUpTable that we are looking at.
+    int currentCol = 1;   // index of the current step.
 
+    int step = numSteps;  // count of steps to exit while loop
+
+    while(step != 0) {
+
+      if(signUpTable[student][currentCol] == 1) // student is willing to do the current step.
+      {
+        scheduleTable[student][currentCol] = 1; // assign student to the step
+        currentCol++;                           // current step is incremented
+        step--;
+      }
+      else // student is not willing to do the current step
+        {
+        if(currentCol != numSteps) {
+          int con = 0;          // count for the most consecutive steps student will do.
+          int studentIndex = 0; // index of student that will do the most consecutive steps.
+
+          //finds the student that will do the most consecutive steps.
+          for(int row = 1; row <= numStudents; row++) {
+            int currentNumConsecutive = 0;
+
+            for(int col = currentCol; col <= numSteps; col++) {
+              if(signUpTable[row][col] == 0) break; // if 0 not consecutive any more and leave loop.
+
+              currentNumConsecutive++;
+
+              if (currentNumConsecutive > con) {  // update consecutive if its less than the current.
+                con = currentNumConsecutive;
+                studentIndex = row; }
+            }
+
+          }
+          student = studentIndex; // update student to the one who will do most consecutive rows.
+        } else {
+          if(student == numStudents) student = 1;   // loop students
+          else student++;   // increment student to look at the next.
+        }
+      }
+    }
     return scheduleTable;
   }
 
