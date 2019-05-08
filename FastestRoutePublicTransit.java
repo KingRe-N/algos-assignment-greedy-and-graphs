@@ -1,7 +1,7 @@
 /**
  * Public Transit
- * Author: Your Name and Carolyn Yao
- * Does this compile? Y/N
+ * Author: Jen Chung Liew :) and Carolyn Yao
+ * Does this compile? Y
  */
 
 /**
@@ -32,9 +32,86 @@ public class FastestRoutePublicTransit {
     int[][] first,
     int[][] freq
   ) {
-    // Your code along with comments here. Feel free to borrow code from any
-    // of the existing method. You can also make new helper methods.
-    return 0;
+    int path[] = myShortestTime(lengths, S, T); //finds the shortest path from starting station to destination
+    int index= first[0].length-1;
+    //there are -1 as placeholder, so we'll traverse backwards to find the beginning of the shortest path
+    while(path[index]!=S && index>0) {
+      index--;
+    }
+
+    int shortestTime=0; //keeps track of the shortest time it takes to get from starting station to destination station
+    int nextTrainTime;  //finds the nextTrainTime plus the time it takes for the train to travel that edge
+    int currentTime=startTime;
+
+    for(int i=index; i>=1; i--) {
+
+      int stationNumber = path[i];
+      int nextStation = path[i-1];
+      int trainTimes= first[stationNumber][nextStation];
+      int k = 0;
+        while (trainTimes < currentTime) {
+          trainTimes = first[stationNumber][nextStation] + (k * freq[stationNumber][nextStation]);
+          k++;
+      }
+
+      nextTrainTime = trainTimes + lengths[stationNumber][nextStation];
+      shortestTime = shortestTime + (nextTrainTime - currentTime);
+      currentTime=nextTrainTime;
+    }
+    return shortestTime;
+  }
+
+  // Modified Dijkstra's shortest path from https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
+  // needs to return shortest path to target instead of all shortest path.
+
+  public int[] myShortestTime(int[][] graph, int src, int target) {
+    int V = graph[0].length;    // the final shortest
+    int[] times = new int[V];   // shortest time from src to i
+    int[] prev = new int[V];    // stations visited
+    int[] path = new int[V];
+    prev[src] = -1;    // Sets the previous station of source to -1 since it doesn't exist.
+
+    // sptSet[i] will true if vertex i is included in shortest
+    // path tree or shortest distance from src to i is finalized
+    Boolean sptSet[] = new Boolean[V];
+
+    // Initialize all distances as INFINITE and stpSet[] as false
+    for (int i = 0; i < V; i++)
+    {
+      times[i] = Integer.MAX_VALUE;
+      path[i] = -1;
+      sptSet[i] = false;
+    }
+    // Time of source vertex from itself is always 0
+    times[src] = 0;
+
+    for (int count = 0; count < V - 1; count++) { 		// Find shortest path to all the vertices
+      // Pick the minimum distance vertex from the set of vertices not yet processed.
+      // u is always equal to source in first iteration.
+      // Mark u as processed.
+      int u = findNextToProcess(times, sptSet);
+      sptSet[u] = true;
+
+      // Update time value of all the adjacent vertices of the picked vertex.
+      for (int v = 0; v < V; v++) {
+        // Update time[v] only if is not in sptSet, there is an
+        // edge from u to v, and total weight of path from src to
+        // v through u is smaller than current value of time[v]
+        if (!sptSet[v] && graph[u][v]!=0 && times[u] != Integer.MAX_VALUE && times[u]+graph[u][v] < times[v]) {
+          times[v] = times[u] + graph[u][v];
+          prev[v] = u; //Records u as the previous station of v.
+        }
+      }
+    }
+    //Finds the shortest time between T and source.
+    int i = 0;
+    int t = target;
+    while (t != src) {
+      path[i++] = t;
+      t = prev[t];
+    }
+    path[i] = t;
+    return path;
   }
 
   /**
@@ -104,7 +181,6 @@ public class FastestRoutePublicTransit {
         }
       }
     }
-
     printShortestTimes(times);
   }
 
@@ -125,5 +201,50 @@ public class FastestRoutePublicTransit {
     t.shortestTime(lengthTimeGraph, 0);
 
     // You can create a test case for your implemented method for extra credit below
+
+    int length[][] = new int[][] {
+         /*---1---2---3---4---5---6---7---8---9---*/
+            { 0,  0,  6,  0,  0,  2,  0,  11, 0 },  //1
+            { 0,  0,  8,  0,  13, 0,  0,  0,  0 },  //2
+            { 6,  8,  0,  7,  0,  4,  0,  0,  6 },  //3
+            { 0,  0,  7,  0,  12, 4,  0,  2,  0 },  //4
+            { 0,  13, 0,  12, 0,  0,  0,  0,  0 },  //5
+            { 2,  0,  4,  4,  0,  0,  6,  0,  0 },  //6
+            { 0,  0,  0,  0,  0,  6,  0,  5,  2 },  //7
+            { 11, 0,  0,  2,  0,  0,  5,  0,  0 },  //8
+            { 0,  0,  6,  0,  0,  0,  2,  0,  0 } };//9
+
+    int first[][] = new int[][] {
+         /*---1---2---3---4---5---6---7---8---9---*/
+            { 0,  0,  9,  0,  0,  8,  0,  15, 0 },  //1
+            { 0,  0,  2,  0,  22, 0,  0,  0,  0 },  //2
+            { 2,  8,  0,  7,  0,  4,  0,  0,  6 },  //3
+            { 0,  0,  7,  0,  13, 4,  0,  6,  0 },  //4
+            { 0,  13, 0,  22, 0,  0,  0,  0,  0 },  //5
+            { 8,  0,  4,  9,  0,  0,  8,  0,  0 },  //6
+            { 0,  0,  0,  0,  0,  4,  0,  9,  6 },  //7
+            { 17, 0,  0,  4,  0,  0,  4, 0,  0 },  //8
+            { 0,  0,  4,  0,  0,  0,  9,  0,  0 } };//9
+
+    int freq[][] = new int[][] {
+         /*---1---2---3---4---5---6---7---8---9---*/
+            { 0,  0,  5,  0,  0,  4,  0,  5,  0 },  //1
+            { 0,  0,  6,  0,  8,  0,  0,  0,  0 },  //2
+            { 5,  6,  0,  7,  0,  4,  0,  0,  8 },  //3
+            { 0,  0,  7,  0,  10, 4,  0,  2,  0 },  //4
+            { 0,  8,  0,  10, 0,  0,  0,  0,  0 },  //5
+            { 4,  0,  4,  4,  0,  0,  7,  0,  0 },  //6
+            { 0,  0,  0,  0,  0,  7,  0,  8,  6 },  //7
+            { 5,  0,  0,  2,  0,  0,  8,  0,  0 },  //8
+            { 0,  0,  8,  0,  0,  0,  6,  0,  0 } };//9
+
+
+    int shortestTime;
+    int startStation = 1;
+    int targetStation = 8;
+
+    shortestTime = t.myShortestTravelTime(startStation, targetStation, 5, length, first, freq);
+    System.out.println( "You will get to station " + targetStation + " from station " + startStation + " in " + shortestTime + " minutes.");
   }
 }
+
